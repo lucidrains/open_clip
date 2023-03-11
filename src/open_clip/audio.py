@@ -90,7 +90,7 @@ class AudioSpectrogramTransformer(nn.Module):
             act_layer=act_layer,
             norm_layer=norm_layer,
             output_tokens=output_tokens,
-            channels=1
+            channels=3
         )
 
     def lock(self, unlocked_groups=0, freeze_bn_stats=False):
@@ -106,6 +106,7 @@ class AudioSpectrogramTransformer(nn.Module):
     def forward(self, x: torch.Tensor, should_augment: bool = True):
         assert x.ndim in {2, 3, 4}   # can be either wave (batch, time) or spectrogram (batch, freq, time) | (batch, 1, freq, time)
         is_spectrogram = x.ndim >= 3
+        print(x.shape)
 
         if not is_spectrogram:
             x = self.spec(x)

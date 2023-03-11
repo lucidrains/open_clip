@@ -467,6 +467,7 @@ class VisionTransformer(nn.Module):
             x = self.patchnorm_pre_ln(x)
             x = self.conv1(x)
         else:
+            # x = torch.squeeze(x, dim=1)
             x = self.conv1(x)  # shape = [*, width, grid, grid]
             x = x.reshape(x.shape[0], x.shape[1], -1)  # shape = [*, width, grid ** 2]
             x = x.permute(0, 2, 1)  # shape = [*, grid ** 2, width]

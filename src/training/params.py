@@ -24,6 +24,7 @@ class ParseKwargs(argparse.Action):
 
 
 def parse_args(args):
+    print(args)
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--train-data",
@@ -424,6 +425,21 @@ def parse_args(args):
         default=None,
         help='Which pre-trained weights to distill from, if any.'
     )
+
+    parser.add_argument(
+        "--cc",
+        default=False,
+        help='If cc data',
+        type=bool
+    )
+
+    parser.add_argument(
+        "--world-size",
+        default=False,
+        help='world size',
+        type=int
+    )
+
     args = parser.parse_args(args)
 
     # If some params are not passed, we use the default values based on model name.
