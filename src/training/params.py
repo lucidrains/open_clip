@@ -24,7 +24,6 @@ class ParseKwargs(argparse.Action):
 
 
 def parse_args(args):
-    print(args)
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--train-data",
