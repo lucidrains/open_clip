@@ -444,7 +444,7 @@ def get_wds_dataset(args, preprocess_img, is_train, epoch=0, floor=False, tokeni
         dataset,
         batch_size=None,
         shuffle=False,
-        num_workers=args.workers,
+        num_workers=12,
         persistent_workers=True,
     )
 

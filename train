@@ -1,0 +1,19 @@
+python src/training/main.py \
+    --save-frequency 1 \
+    --zeroshot-frequency 1 \
+    --report-to tensorboard \
+    --train-data="/fsx/home-marianna/cc_wat/53182.tar"  \
+    --val-data="/fsx/home-marianna/cc_wat/53182.tar"  \
+    --warmup 10000 \
+    --batch-size=128 \
+    --lr=1e-3 \
+    --wd=0.1 \
+    --epochs=30 \
+    --workers=0 \
+    --model audio \
+    --dataset-type="webdataset" \
+    --train-num-samples=2000 \
+    --cc True \
+    --world-size 1 \
+    --workers 1 \
+    --debug
