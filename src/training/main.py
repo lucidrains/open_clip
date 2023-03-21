@@ -4,7 +4,6 @@ import os
 import re
 import subprocess
 import sys
-sys.path.append(os.path.abspath('/fsx/home-marianna/cc_wat/open_clip2/open_clip/src'))
 import random
 from datetime import datetime
 
@@ -32,7 +31,7 @@ from open_clip import create_model_and_transforms, trace_model, get_tokenizer, c
 from training.data import get_data
 from training.distributed import is_master, init_distributed_device, broadcast_object
 from training.logger import setup_logging
-from params import parse_args
+from training.params import parse_args
 from training.scheduler import cosine_lr, const_lr, const_lr_cooldown
 from training.train import train_one_epoch, evaluate
 from training.file_utils import pt_load, check_exists, start_sync_process, remote_sync
@@ -397,7 +396,6 @@ def main(args):
             logging.info(f'Start epoch {epoch}')
 
         train_one_epoch(model, data, loss, epoch, optimizer, scaler, scheduler, dist_model, args, tb_writer=writer)
-        print(epoch)
         completed_epoch = epoch + 1
 
         if any(v in data for v in ('val', 'imagenet-val', 'imagenet-v2')):

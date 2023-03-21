@@ -432,13 +432,6 @@ def parse_args(args):
         type=bool
     )
 
-    parser.add_argument(
-        "--world-size",
-        default=False,
-        help='world size',
-        type=int
-    )
-
     args = parser.parse_args(args)
 
     # If some params are not passed, we use the default values based on model name.
