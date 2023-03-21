@@ -1,0 +1,20 @@
+{
+    "embed_dim": 256,
+    "vision_cfg": {
+        "image_size": 512,
+        "layers": 12,
+        "width": 768,
+        "patch_size": 18,
+        "output_tokens": true
+    },
+    "text_cfg": {
+        "context_length": 76,
+        "vocab_size": 64000,
+        "layers": 12,
+        "heads": 12,
+        "width": 768,
+        "embed_cls": true,
+        "output_tokens": true
+    },
+    "custom_text": true
+}
