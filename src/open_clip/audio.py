@@ -90,7 +90,7 @@ class AudioSpectrogramTransformer(nn.Module):
             act_layer=act_layer,
             norm_layer=norm_layer,
             output_tokens=output_tokens,
-            channels=1
+            channels=3
         )
 
     def lock(self, unlocked_groups=0, freeze_bn_stats=False):
@@ -267,11 +267,12 @@ class AudioCLIP(nn.Module):
         return F.normalize(x, dim=-1) if normalize else x
 
     def forward(self, audio, text, audio_latent=None, augment_audio=True):
-        text_latent = self.encode_text(text)
+        
 
         if audio_latent is None:
             audio_latent = self.encode_image(audio, should_augment=augment_audio)
 
+        text_latent = self.encode_text(text)
         logit_scale = self.logit_scale.exp()
 
         if self.output_dict:

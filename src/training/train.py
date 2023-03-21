@@ -215,7 +215,6 @@ def train_one_epoch(model, data, loss, epoch, optimizer, scaler, scheduler, dist
                 "lr": optimizer.param_groups[0]["lr"]
             }            
             log_data.update({name:val.val for name,val in losses_m.items()})
-
             for name, val in log_data.items():
                 name = "train/" + name
                 if tb_writer is not None:

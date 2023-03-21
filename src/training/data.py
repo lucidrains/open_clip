@@ -323,6 +323,33 @@ class ResampledShards2(IterableDataset):
             else:
                 yield dict(url=self.rng.choices(self.urls, weights=self.weights, k=1)[0])
 
+def preprocess_cc(sample:tuple):
+    '''
+    '''
+    image, json_data = sample['jpg'], sample['json']
+   
+    audio_meta = json_data.get('audio_meta', None)
+    
+    if audio_meta is not None:
+        tags = audio_meta.get('tags', None)
+        if tags is not None:
+            try:
+                title, artist, genre = '', '', ''
+                for k in tags.keys():
+                    if k in ['title', 'TITLE']:
+                        title = f'titled {tags[k]}'
+                    if k in ['artist', 'ARTIST']:
+                        artist = f'by {tags[k]}'
+                    if k in ['genre', 'GENRE']:
+                        genre = tags[k]
+
+                label = f'{genre} song "{title}" {artist}'
+            except:
+                pass
+    label = json_data["caption"]
+
+    return {'jpg': image, 'txt': label}
+
 
 def get_wds_dataset(args, preprocess_img, is_train, epoch=0, floor=False, tokenizer=None):
     input_shards = args.train_data if is_train else args.val_data
@@ -375,9 +402,20 @@ def get_wds_dataset(args, preprocess_img, is_train, epoch=0, floor=False, tokeni
             # at this point, we have an iterator over the shards assigned to each worker
             wds.tarfile_to_samples(handler=log_and_continue),
         ])
+
     pipeline.extend([
         wds.select(filter_no_caption_or_no_image),
-        wds.decode("pilrgb", handler=log_and_continue),
+        wds.decode("pilrgb", handler=log_and_continue)
+    ])
+    
+    
+    if args.cc:
+        pipeline.extend([
+            wds.map(preprocess_cc)
+        ])
+    
+    
+    pipeline.extend([
         wds.rename(image="jpg;png;jpeg;webp", text="txt"),
         wds.map_dict(image=preprocess_img, text=lambda text: tokenizer(text)[0]),
         wds.to_tuple("image", "text"),

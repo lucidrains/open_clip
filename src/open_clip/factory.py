@@ -18,6 +18,7 @@ from .openai import load_openai_model
 from .pretrained import is_pretrained_cfg, get_pretrained_cfg, download_pretrained, list_pretrained_tags_by_model, download_pretrained_from_hf
 from .transform import image_transform, AugmentationCfg
 from .tokenizer import HFTokenizer, tokenize
+from .audio import AudioCLIP, CLIPAudioCfg, CLIPTextCfg
 
 
 HF_HUB_PREFIX = 'hf-hub:'
@@ -76,6 +77,9 @@ def get_model_config(model_name):
 def get_tokenizer(model_name):
     if model_name.startswith(HF_HUB_PREFIX):
         tokenizer = HFTokenizer(model_name[len(HF_HUB_PREFIX):])
+    if 'audio' in model_name:
+        tokenizer = HFTokenizer('laion/CLIP-ViT-B-32-laion2B-s34B-b79K')
+
     else:
         config = get_model_config(model_name)
         tokenizer = HFTokenizer(
@@ -125,7 +129,6 @@ def create_model(
         model_id = model_name[len(HF_HUB_PREFIX):]
         checkpoint_path = download_pretrained_from_hf(model_id, cache_dir=cache_dir)
         config_path = download_pretrained_from_hf(model_id, filename='open_clip_config.json', cache_dir=cache_dir)
-
         with open(config_path, 'r', encoding='utf-8') as f:
             config = json.load(f)
         pretrained_cfg = config['preprocess_cfg']
@@ -135,6 +138,8 @@ def create_model(
         checkpoint_path = None
         pretrained_cfg = {}
         model_cfg = None
+
+    
 
     if isinstance(device, str):
         device = torch.device(device)
@@ -154,7 +159,7 @@ def create_model(
             model.output_dict = True
     else:
         model_cfg = model_cfg or get_model_config(model_name)
-        if model_cfg is not None:
+        if model_cfg is not None or 'audio' in model_name:
             logging.info(f'Loaded {model_name} model config.')
         else:
             logging.error(f'Model config for {model_name} not found; available models {list_models()}.')
@@ -180,14 +185,19 @@ def create_model(
                 assert False, 'pretrained image towers currently only supported for timm models'
 
         cast_dtype = get_cast_dtype(precision)
-        is_hf_model = 'hf_model_name' in model_cfg.get('text_cfg', {})
-        custom_text = model_cfg.pop('custom_text', False) or force_custom_text or is_hf_model
-
+        is_hf_model = 'hf_model_name' in model_cfg.get('text_cfg', {}) or not 'audio' in model_name
+        custom_text = model_cfg.pop('custom_text', False) or force_custom_text or is_hf_model or 'audio' in model_name
         if custom_text:
             if is_hf_model:
                 model_cfg['text_cfg']['hf_model_pretrained'] = pretrained_hf
             if "coca" in model_name:
                 model = CoCa(**model_cfg, cast_dtype=cast_dtype)
+            if "audio" in model_name:
+                model = AudioCLIP(
+                    embed_dim = model_cfg['emb_dim'],
+                    audio_cfg = CLIPAudioCfg(**model_cfg['vision_cfg']),
+                    text_cfg = CLIPTextCfg(model_cfg['text_cfg']),
+                )
             else:
                 model = CustomTextCLIP(**model_cfg, cast_dtype=cast_dtype)
         else:

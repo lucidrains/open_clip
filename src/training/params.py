@@ -424,6 +424,14 @@ def parse_args(args):
         default=None,
         help='Which pre-trained weights to distill from, if any.'
     )
+
+    parser.add_argument(
+        "--cc",
+        default=False,
+        help='If cc data',
+        type=bool
+    )
+
     args = parser.parse_args(args)
 
     # If some params are not passed, we use the default values based on model name.
