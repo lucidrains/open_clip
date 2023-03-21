@@ -121,8 +121,8 @@ class AudioSpectrogramTransformer(nn.Module):
         rounded_height = height // patch_height * patch_height
         rounded_width = width // patch_width * patch_width
 
-        # if (height, width) != (rounded_height, rounded_width):
-        #     print(f'spectrogram yielded shape of {(height, width)}, but had to be cropped to {(rounded_height, rounded_width)} to be patchified for transformer')
+        if (height, width) != (rounded_height, rounded_width):
+            print(f'spectrogram yielded shape of {(height, width)}, but had to be cropped to {(rounded_height, rounded_width)} to be patchified for transformer')
 
         x = x[..., :rounded_height, :rounded_width]
 

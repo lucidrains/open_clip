@@ -129,7 +129,6 @@ def create_model(
         model_id = model_name[len(HF_HUB_PREFIX):]
         checkpoint_path = download_pretrained_from_hf(model_id, cache_dir=cache_dir)
         config_path = download_pretrained_from_hf(model_id, filename='open_clip_config.json', cache_dir=cache_dir)
-
         with open(config_path, 'r', encoding='utf-8') as f:
             config = json.load(f)
         pretrained_cfg = config['preprocess_cfg']
@@ -139,6 +138,8 @@ def create_model(
         checkpoint_path = None
         pretrained_cfg = {}
         model_cfg = None
+
+    
 
     if isinstance(device, str):
         device = torch.device(device)
@@ -184,10 +185,8 @@ def create_model(
                 assert False, 'pretrained image towers currently only supported for timm models'
 
         cast_dtype = get_cast_dtype(precision)
-        # is_hf_model = 'hf_model_name' in model_cfg.get('text_cfg', {})
-        # custom_text = model_cfg.pop('custom_text', False) or force_custom_text or is_hf_model
-        is_hf_model = False
-        custom_text = True
+        is_hf_model = 'hf_model_name' in model_cfg.get('text_cfg', {}) or not 'audio' in model_name
+        custom_text = model_cfg.pop('custom_text', False) or force_custom_text or is_hf_model or 'audio' in model_name
         if custom_text:
             if is_hf_model:
                 model_cfg['text_cfg']['hf_model_pretrained'] = pretrained_hf
@@ -195,9 +194,9 @@ def create_model(
                 model = CoCa(**model_cfg, cast_dtype=cast_dtype)
             if "audio" in model_name:
                 model = AudioCLIP(
-                    embed_dim = 16,
-                    audio_cfg = CLIPAudioCfg(**{'image_size': (512, 1001), 'patch_size': 64}),
-                    text_cfg = CLIPTextCfg(),
+                    embed_dim = model_cfg['emb_dim'],
+                    audio_cfg = CLIPAudioCfg(**model_cfg['vision_cfg']),
+                    text_cfg = CLIPTextCfg(model_cfg['text_cfg']),
                 )
             else:
                 model = CustomTextCLIP(**model_cfg, cast_dtype=cast_dtype)
@@ -319,15 +318,14 @@ def create_model_and_transforms(
     image_mean = image_mean or getattr(model.visual, 'image_mean', None)
     image_std = image_std or getattr(model.visual, 'image_std', None)
     preprocess_train = image_transform(
-        # model.visual.image_size,
-        (512, 1001),
+        model.visual.image_size,
         is_train=True,
         mean=image_mean,
         std=image_std,
         aug_cfg=aug_cfg,
     )
     preprocess_val = image_transform(
-        (512, 1001),
+        model.visual.image_size,
         is_train=False,
         mean=image_mean,
         std=image_std,
