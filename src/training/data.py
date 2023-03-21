@@ -404,7 +404,7 @@ def get_wds_dataset(args, preprocess_img, is_train, epoch=0, floor=False, tokeni
         ])
 
     pipeline.extend([
-        # wds.select(filter_no_caption_or_no_image),
+        wds.select(filter_no_caption_or_no_image),
         wds.decode("pilrgb", handler=log_and_continue)
     ])
     
@@ -444,7 +444,7 @@ def get_wds_dataset(args, preprocess_img, is_train, epoch=0, floor=False, tokeni
         dataset,
         batch_size=None,
         shuffle=False,
-        num_workers=12,
+        num_workers=args.workers,
         persistent_workers=True,
     )
 
