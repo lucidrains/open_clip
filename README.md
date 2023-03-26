@@ -294,7 +294,7 @@ To generate text with coca this should work
 import open_clip
 from PIL import Image
 
-model, _, transform = open_clip.create_model_and_transform(
+model, _, transform = open_clip.create_model_and_transforms(
   model_name="coca_ViT-B-32",
   pretrained="laion2B-s13B-b90k"
 )
